@@ -105,16 +105,10 @@ Implementation Address: 0x4753eD9Ddb4eEE055D7103F0754DfA9c2dCC1053 (升级合约
 
 **区块链浏览器实现合约验证**
 
-`forge verify-contract \
- ImplementationAddress \
- src/NitchuGakuinCollectionsV1.sol:NitchuGakuinCollectionsV1 \
---chain CHAIN_ID`
+`forge verify-contract ImplementationAddress  src/NitchuGakuinCollectionsV1.sol:NitchuGakuinCollectionsV1 --chain CHAIN_ID`
 
 ---
 
 **区块链浏览器代理合约验证**
 
-`forge verify-contract \
- PROXY_ADDRESS \
- lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy \
---chain CHAIN_ID`
+`forge verify-contract PROXY_ADDRESS lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy --chain CHAIN_ID`
