@@ -1,0 +1,119 @@
+# 日中学院 NFT プロジェクト
+
+[🇨🇳 中文](README.md) [🇯🇵 日本語](README.ja.md)
+
+### 正式コントラクトアドレス
+
+Proxy アドレス: 0x9d291c7a50A3bF0980E732890177FD4e0998E13a  
+Implementation アドレス: 0x4753eD9Ddb4eEE055D7103F0754DfA9c2dCC1053 (アップグレード後に変更されます)
+
+### テストコントラクトアドレス
+
+テスト用プロキシコントラクト：0x37d272B8d4f844c29eB05C5ABC8271E8f22cFeA3 (V1, 所有者は Account1)  
+テスト用プロキシコントラクト：0x5866e3731E7d77781e9588C3A00c93EF7f5dEe2F (V1, 所有者は Account2 ですが、Account1 は引き続き管理者)
+
+### 使用手順（Foundry CLI コマンド）
+
+| 操作                               | コマンド例                                                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **テストスクリプトで全関数実行**   | `forge test -vvvv`                                                                                                                          |
+| **初版デプロイ**                   | `forge script script/Deploy.s.sol:DeployScript --rpc-url <your_rpc_url> --broadcast --verify --etherscan-api-key <ETHERSCAN_API_KEY> -vvvv` |
+| **互換性確認**                     | `forge script script/Upgrade.s.sol:UpgradeScript --sig "validateUpgrade()" --rpc-url <your_rpc_url> --broadcast -vvvv`                      |
+| **新実装の事前デプロイ（省略可）** | `forge script script/Upgrade.s.sol:UpgradeScript --sig "prepareUpgrade()" --rpc-url ${your_rpc_url} --broadcast -vvvv`                      |
+| **正式アップグレード**             | `forge script script/Upgrade.s.sol:UpgradeScript --sig "upgradeTo()" --rpc-url ${your_rpc_url} --broadcast -vvvv`                           |
+| `                                  |                                                                                                                                             |
+
+デプロイまたはアップグレード前に以下を実行
+
+`forge clean && forge build `
+
+実際のメインネットで異なるサイズ・形式の SVG をテストした際のガス消費量（ブロックチェーン上限 3000 万）
+
+| ブロックチェーンネットワーク | 操作                     | Chunks | ガス消費(確定値) | 価値(ネットワーク状況により変動) |
+| ---------------------------- | ------------------------ | ------ | ---------------- | -------------------------------- |
+| Polygon                      | デプロイ                 | -      | 3,170,857        | 0.746498259310977786 POL         |
+| Polygon                      | コレクション作成         | -      | 116,477          | 0.037038327500328612 POL         |
+| Polygon                      | 3.3 KB アップロード      | 1      | 2,510,479        | 2.557224407104099114 POL         |
+| Polygon                      | 22 KB アップロード       | 1      | 15,649,101       | 1.742997666200924718 POL         |
+| Polygon                      | アップグレード           | -      | 2,975,668        | 0.191769677865799832 POL         |
+| **Optimism**                 | デプロイ                 | -      | 3,170,857        | **0.000000001854951345 ETH**     |
+| **Optimism**                 | デジタルコレクション作成 | -      | 116,453          | **0.000000000095724366 ETH**     |
+| **Optimism**                 | 22 KB アップロード       | 1      | 15,785,220       | **0.00000000672450372 ETH**      |
+| **Optimism**                 | 57 KB アップロード       | 2      | 20,106,850       | **0.00000107505294895 ETH**      |
+
+## 🧪 テストケースデモ
+
+**ネットワーク：** Anvil（ローカルテストチェーン）  
+**プロキシアドレス：** `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`  
+**V1 実装アドレス：** `0x5FbDB2315678afecb367f032d93F642f64180aa3`  
+**初期所有者：** `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`  
+**テスト PK 0：** `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`  
+**テスト PK 2：** `0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a`
+
+---
+
+### 🔹 基本的な問い合わせと操作
+
+| 操作説明                             | コマンド                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **コントラクトのバージョン取得**     | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "getVersion() returns(string)" --rpc-url http://127.0.0.1:8545`                                                                                                                                                                                                                  |
+| **新コレクション作成**               | `cast send 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "createCollection(string,string,uint256,bool,bool)" "Nitchu Gakuin Digital Collection Test" "Nitchu Gakuin Digital Collection Description Test" 100 false true --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://127.0.0.1:8545` |
+| **新コレクション作成（スクリプト）** | `forge script script/CreateCollection.s.sol:CreateCollectionScript --rpc-url anvil --broadcast -vvvv`                                                                                                                                                                                                                                  |
+| **コレクション情報取得**             | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "getCollectionInfo(uint256) returns (string,string,uint256,uint256,bool,bool,uint256,bool)" 1 --rpc-url http://127.0.0.1:8545`                                                                                                                                                   |
+| **既に受け取ったか確認**             | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "hasClaimed(uint256,address)" 1 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC --rpc-url http://127.0.0.1:8545`                                                                                                                                                                      |
+| **NFT 数量確認**                     | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "balanceOf(address,uint256)" 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC 1 --rpc-url http://127.0.0.1:8545`                                                                                                                                                                       |
+
+---
+
+### 🔹 NFT 受け取りとアップロード
+
+| 操作説明                           | コマンド                                                                                                                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **NFT 受け取り**                   | `cast send 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "claim(uint256)" 1 --private-key 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a --rpc-url http://127.0.0.1:8545`             |
+| **NFT 受け取り（スクリプト）**     | `forge script script/Claim.s.sol:ClaimScript --rpc-url anvil --broadcast -vvvv`                                                                                                                        |
+| **NFT エアドロップ（スクリプト）** | `forge script script/Airdrop.s.sol:AirdropScript --rpc-url anvil --broadcast -vvvv`                                                                                                                    |
+| **SVG アップロード完了**           | `cast send 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "finalizeSvgUpload(uint256)" 1 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://127.0.0.1:8545` |
+| **SVG データ取得**                 | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "getSvgData(uint256) returns(string)" 1 --rpc-url http://127.0.0.1:8545`                                                                         |
+
+---
+
+### 🔹 権限・管理関連
+
+| 操作説明                                         | コマンド                                                                                                                                             |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **コントラクト所有者確認**                       | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "owner() returns (address)" --rpc-url http://127.0.0.1:8545`                                   |
+| **管理者リスト確認**                             | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "getAdmins() returns (address[])" --rpc-url http://127.0.0.1:8545`                             |
+| **アップグレードインターフェースバージョン確認** | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "UPGRADE_INTERFACE_VERSION() returns (string)" --rpc-url http://127.0.0.1:8545`                |
+| **管理者か確認**                                 | `cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "isAdmin(address)" 0x70997970C51812dc3A010C7d01b50e0d17dc79C9 --rpc-url http://127.0.0.1:8545` |
+| **Owner 移転**                                   | `cast send <0xProxyContractAddress> "transferOwnership(address)" 0xNewOwnerAddress --rpc-url <rpc> --private-key <your_private_key>`                 |
+
+---
+
+### 🔹 SVG データアップロード
+
+| 操作説明                               | コマンド                                                                                                                                                                                                                |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SVG チャンク追加**                   | `cast send 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "addSvgChunk(uint256,uint256,bytes)" 1 0 ABCDEF --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://127.0.0.1:8545` |
+| **SVG チャンク一括追加（スクリプト）** | `forge script script/AddSvgChucks.s.sol:AddSvgChunksScript --rpc-url anvil --broadcast -vvvv`                                                                                                                           |
+
+---
+
+✅ **説明：**
+
+上記のコマンドはすべてローカル Anvil ネットワークで実行可能で、`NitchuGakuinCollections` のデプロイ・管理・アップグレードの動作確認に使用できます。
+
+---
+
+**ブロックチェーンエクスプローラーでのコントラクト検証**
+
+`forge verify-contract \
+ ImplementationAddress \
+ src/NitchuGakuinCollectionsV1.sol:NitchuGakuinCollectionsV1 \ --chain CHAIN_ID`
+
+---
+
+**ブロックチェーンエクスプローラーでのプロキシコントラクト検証**
+
+`forge verify-contract \
+ PROXY_ADDRESS \
+ lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy \ --chain CHAIN_ID`

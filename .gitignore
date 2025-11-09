@@ -1,0 +1,18 @@
+# Ignores development broadcast logs
+broadcast/
+
+# Docs
+docs/
+
+# Environment
+.env
+
+# Foundry / Forge / Solidity build artefacts
+out/
+artifacts/
+cache/
+lib/
+
+# OS / editor
+.DS_Store
+*.log
