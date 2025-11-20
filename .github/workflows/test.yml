@@ -29,8 +29,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          forge install --git https://github.com/foundry-rs/forge-std
-          forge install --git https://github.com/OpenZeppelin/openzeppelin-foundry-upgrades
+          forge install foundry-rs/forge-std
+          forge install OpenZeppelin/openzeppelin-foundry-upgrades
 
       - name: Run Forge fmt
         run: forge fmt --check
