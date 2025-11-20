@@ -13,10 +13,10 @@ import {INitchuGakuinCollections} from "./interfaces/INitchuGakuinCollections.so
  * @title 日中学院数字藏品合约 V1
  * @dev ERC-1155 + UUPS 升级 + SVG 分块 + 白名单 + 管理员系统
  * @author Mo Kaiko
-* @custom:organization 日中学院
+ * @custom:organization 日中学院
  * @custom:website https://www.rizhong.org/
  */
-contract NitchuGakuinCollectionsV1 is 
+contract NitchuGakuinCollectionsV1 is
     Initializable,
     ERC1155Upgradeable,
     OwnableUpgradeable,
@@ -55,6 +55,7 @@ contract NitchuGakuinCollectionsV1 is
         _onlyAdminOrOwner();
         _;
     }
+
     function _onlyAdminOrOwner() internal view {
         if (msg.sender != owner() && !_admins[msg.sender]) {
             revert OnlyAdminOrOwner();
@@ -74,7 +75,7 @@ contract NitchuGakuinCollectionsV1 is
     /// ------------------------
     function initialize(address initialOwner) public initializer {
         __ERC1155_init(""); // ERC1155 URI 空
-        __Ownable_init(initialOwner);   // 初始化所有者
+        __Ownable_init(initialOwner); // 初始化所有者
         __Pausable_init();
         _collectionCounter = 1; // tokenId 从1开始
         _admins[initialOwner] = true;
@@ -109,11 +110,11 @@ contract NitchuGakuinCollectionsV1 is
         return tokenId;
     }
 
-    function updateCollectionStatus(
-        uint256 tokenId,
-        bool isWhitelistEnabled,
-        bool isActive
-    ) public override onlyAdminOrOwner {
+    function updateCollectionStatus(uint256 tokenId, bool isWhitelistEnabled, bool isActive)
+        public
+        override
+        onlyAdminOrOwner
+    {
         CollectionInfo storage collection = _collections[tokenId];
         if (bytes(collection.name).length == 0) revert CollectionNotExists();
 
@@ -128,14 +129,10 @@ contract NitchuGakuinCollectionsV1 is
     /// ------------------------
     /**
      * @param tokenId 藏品ID
-     * @param chunkIndex svg数据块索引 必须从0开始 
+     * @param chunkIndex svg数据块索引 必须从0开始
      * @param chunkData svg数据块内容 不能为空
      */
-    function addSvgChunk(
-        uint256 tokenId,
-        uint256 chunkIndex,
-        bytes memory chunkData
-    ) public override onlyAdminOrOwner {
+    function addSvgChunk(uint256 tokenId, uint256 chunkIndex, bytes memory chunkData) public override onlyAdminOrOwner {
         CollectionInfo storage collection = _collections[tokenId];
         if (bytes(collection.name).length == 0) revert CollectionNotExists();
         if (collection.isSvgFinalized) revert Svg_AlreadyFinalized();
@@ -147,6 +144,7 @@ contract NitchuGakuinCollectionsV1 is
 
         emit SvgChunkAdded(tokenId, chunkIndex, collection.svgChunkCount);
     }
+
     /**
      * @dev 获取 SVG 数据、预览（未完成上传完也可预览）前端预览没问题后再调用 completeSvgUpload 完成上传
      */
@@ -186,8 +184,10 @@ contract NitchuGakuinCollectionsV1 is
         if (!collection.isActive) revert CollectionNotActive();
         if (_claimed[tokenId][msg.sender]) revert AlreadyClaimed();
         if (collection.isWhitelistEnabled && !_whitelists[tokenId][msg.sender]) revert NotWhitelisted();
-        uint256 amount = 1;  // 每次只能领取1个
-        if (collection.maxSupply != 0 && collection.currentSupply + amount> collection.maxSupply) revert MaxSupplyReached();
+        uint256 amount = 1; // 每次只能领取1个
+        if (collection.maxSupply != 0 && collection.currentSupply + amount > collection.maxSupply) {
+            revert MaxSupplyReached();
+        }
         if (!collection.isSvgFinalized) revert Svg_NotFinalized();
 
         _claimed[tokenId][msg.sender] = true;
@@ -202,7 +202,7 @@ contract NitchuGakuinCollectionsV1 is
     /// Airdrop
     /// ------------------------
     /**
-     * @dev 
+     * @dev
      * 用于管理员一次性向多个地址发放指定藏品。
      * 规则说明：
      * - 每个地址仅空投 1 个 token
@@ -300,9 +300,15 @@ contract NitchuGakuinCollectionsV1 is
         string memory svgData = getSvgData(tokenId);
         // 使用string.concat提高Gas效率
         string memory json = string.concat(
-            '{"name":"', collection.name, '",',
-            '"description":"', collection.description, '",',
-            '"image":"data:image/svg+xml;base64,', Base64.encode(bytes(svgData)), '",',
+            '{"name":"',
+            collection.name,
+            '",',
+            '"description":"',
+            collection.description,
+            '",',
+            '"image":"data:image/svg+xml;base64,',
+            Base64.encode(bytes(svgData)),
+            '",',
             '"attributes":[{"trait_type":"Collection","value":"Nitchu Gakuin"}]}'
         );
 
@@ -313,16 +319,21 @@ contract NitchuGakuinCollectionsV1 is
     /// Info & Checks
     /// ------------------------
 
-    function getCollectionInfo(uint256 tokenId) public view override returns (
-        string memory name,
-        string memory description,
-        uint256 maxSupply,
-        uint256 currentSupply,
-        bool isWhitelistEnabled,
-        bool isActive,
-        uint256 svgChunkCount,
-        bool isSvgFinalized
-    ) {
+    function getCollectionInfo(uint256 tokenId)
+        public
+        view
+        override
+        returns (
+            string memory name,
+            string memory description,
+            uint256 maxSupply,
+            uint256 currentSupply,
+            bool isWhitelistEnabled,
+            bool isActive,
+            uint256 svgChunkCount,
+            bool isSvgFinalized
+        )
+    {
         CollectionInfo storage collection = _collections[tokenId];
         if (bytes(collection.name).length == 0) revert CollectionNotExists();
 
@@ -384,7 +395,7 @@ contract NitchuGakuinCollectionsV1 is
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         if (balance == 0) revert NoFundsTowithdraw();
-        (bool success, ) = owner().call{value: balance}("");
+        (bool success,) = owner().call{value: balance}("");
         if (!success) revert TransferFailed();
     }
 

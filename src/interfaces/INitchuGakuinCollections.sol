@@ -10,7 +10,14 @@ pragma solidity ^0.8.30;
  */
 interface INitchuGakuinCollections {
     // 事件定义
-    event CollectionCreated(uint256 indexed tokenId, string name, string description, uint256 maxSupply, bool isWhitelistEnabled, bool isActive);
+    event CollectionCreated(
+        uint256 indexed tokenId,
+        string name,
+        string description,
+        uint256 maxSupply,
+        bool isWhitelistEnabled,
+        bool isActive
+    );
     event CollectionStatusUpdated(uint256 indexed tokenId, bool isWhitelistEnabled, bool isActive);
     event CollectionClaimed(uint256 indexed tokenId, address indexed claimer, uint256 amount);
     event AdminAdded(address indexed admin);
@@ -41,14 +48,14 @@ interface INitchuGakuinCollections {
 
     // 藏品信息结构体 推荐只存储简单数据，复杂数据放在映射外，以提高升级兼容性
     struct CollectionInfo {
-        string name;                    // 藏品名称
-        string description;             // 简介 在OpenSea等平台显示
-        uint256 maxSupply;             // 最大供应量 0表示无限量
-        uint256 currentSupply;         // 当前已铸造数量
-        bool isWhitelistEnabled;       // 是否启用白名单
-        bool isActive;                 // 是否可领取
-        uint256 svgChunkCount;         // SVG数据块数量
-        bool isSvgFinalized;           // SVG数据是否上传完成最终确定（锁定后永久不可修改）
+        string name; // 藏品名称
+        string description; // 简介 在OpenSea等平台显示
+        uint256 maxSupply; // 最大供应量 0表示无限量
+        uint256 currentSupply; // 当前已铸造数量
+        bool isWhitelistEnabled; // 是否启用白名单
+        bool isActive; // 是否可领取
+        uint256 svgChunkCount; // SVG数据块数量
+        bool isSvgFinalized; // SVG数据是否上传完成最终确定（锁定后永久不可修改）
     }
 
     /**
@@ -73,11 +80,7 @@ interface INitchuGakuinCollections {
      * @param isWhitelistEnabled 是否启用白名单
      * @param isActive 是否可领取
      */
-    function updateCollectionStatus(
-        uint256 tokenId,
-        bool isWhitelistEnabled,
-        bool isActive
-    ) external;
+    function updateCollectionStatus(uint256 tokenId, bool isWhitelistEnabled, bool isActive) external;
 
     /**
      * @dev 添加SVG数据块
@@ -85,11 +88,7 @@ interface INitchuGakuinCollections {
      * @param chunkIndex 数据块索引
      * @param chunkData 数据块内容
      */
-    function addSvgChunk(
-        uint256 tokenId,
-        uint256 chunkIndex,
-        bytes memory chunkData
-    ) external;
+    function addSvgChunk(uint256 tokenId, uint256 chunkIndex, bytes memory chunkData) external;
 
     /**
      * @dev 完成上传并永久锁定SVG数据
@@ -155,16 +154,19 @@ interface INitchuGakuinCollections {
      * @return svgChunkCount SVG块数量
      * @return isSvgFinalized SVG是否已完成并永久锁定
      */
-    function getCollectionInfo(uint256 tokenId) external view returns (
-        string memory name,
-        string memory description,
-        uint256 maxSupply,
-        uint256 currentSupply,
-        bool isWhitelistEnabled,
-        bool isActive,
-        uint256 svgChunkCount,
-        bool isSvgFinalized
-    );
+    function getCollectionInfo(uint256 tokenId)
+        external
+        view
+        returns (
+            string memory name,
+            string memory description,
+            uint256 maxSupply,
+            uint256 currentSupply,
+            bool isWhitelistEnabled,
+            bool isActive,
+            uint256 svgChunkCount,
+            bool isSvgFinalized
+        );
 
     /**
      * @dev 检查地址是否在白名单中

@@ -10,26 +10,30 @@ import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
  * @author Mo Kaiko
  */
 contract UpgradeScript is Script {
-    struct NetworkConfig { string rpcUrl; uint256 deployerPrivateKey; address proxyAddress; }
+    struct NetworkConfig {
+        string rpcUrl;
+        uint256 deployerPrivateKey;
+        address proxyAddress;
+    }
     mapping(uint256 => NetworkConfig) public networkConfigs;
     string public constant OLD_CONTRACT_NAME = "NitchuGakuinCollectionsV1.sol"; //  ⚠️ 步骤 1/3, 旧版本合约名称
     string public constant NEW_CONTRACT_NAME = "NitchuGakuinCollectionsV2.sol"; //  ⚠️ 步骤 2/3, 新版本合约名称
 
-    function setUp() public { 
-        networkConfigs[10] = NetworkConfig({ 
-            rpcUrl: vm.envString("OP_RPC_URL"), 
+    function setUp() public {
+        networkConfigs[10] = NetworkConfig({
+            rpcUrl: vm.envString("OP_RPC_URL"),
             deployerPrivateKey: vm.envUint("PRIVATE_KEY_ACCOUNT_1"),
-            proxyAddress:0x9d291c7a50A3bF0980E732890177FD4e0998E13a     // ⚠️ 步骤 3/3, 使用 Optimism 部署的代理合约地址
+            proxyAddress: 0x9d291c7a50A3bF0980E732890177FD4e0998E13a // ⚠️ 步骤 3/3, 使用 Optimism 部署的代理合约地址
         });
-        networkConfigs[137] = NetworkConfig({ 
-            rpcUrl: vm.envString("POLYGON_RPC_URL"), 
+        networkConfigs[137] = NetworkConfig({
+            rpcUrl: vm.envString("POLYGON_RPC_URL"),
             deployerPrivateKey: vm.envUint("PRIVATE_KEY_ACCOUNT_1"),
-            proxyAddress:0x627E2C31cB771cfCD1207A7322773BDc3593eE4d     //  ⚠️ 步骤 3/3, 使用 Polygon 部署的代理合约地址
-        }); 
-        networkConfigs[31337] = NetworkConfig({ 
-            rpcUrl: "http://localhost:8545", 
+            proxyAddress: 0x627E2C31cB771cfCD1207A7322773BDc3593eE4d //  ⚠️ 步骤 3/3, 使用 Polygon 部署的代理合约地址
+        });
+        networkConfigs[31337] = NetworkConfig({
+            rpcUrl: "http://localhost:8545",
             deployerPrivateKey: vm.envUint("ANVIL_PRIVATE_KEY_1"),
-            proxyAddress:0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512     //  ⚠️ 步骤 3/3, 使用 Anvil 部署的代理合约地址
+            proxyAddress: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 //  ⚠️ 步骤 3/3, 使用 Anvil 部署的代理合约地址
         });
     }
 
@@ -70,7 +74,7 @@ contract UpgradeScript is Script {
         Options memory opts;
         opts.referenceContract = OLD_CONTRACT_NAME; // 明确指定参考合约
         console.log("Upgrading proxy...");
-        
+
         Upgrades.upgradeProxy(config.proxyAddress, NEW_CONTRACT_NAME, "", opts);
         vm.stopBroadcast();
 
