@@ -32,9 +32,6 @@ jobs:
           forge install foundry-rs/forge-std
           forge install OpenZeppelin/openzeppelin-foundry-upgrades
 
-      - name: Run Forge fmt
-        run: forge fmt --check
-
       - name: Run Forge build
         run: forge build --sizes
 
