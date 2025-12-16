@@ -1,6 +1,6 @@
 # Nitchu Gakuin Digital Collections
 
-[🇬🇧 **English**](README.md) 　[🇨🇳 中文](README.cn.md) 　[🇯🇵 日本語](README.ja.md)
+[🇬🇧 **English**](README.md) 　[🇯🇵 日本語](README.ja.md) 　[🇨🇳 中文](README.cn.md)
 
 ---
 

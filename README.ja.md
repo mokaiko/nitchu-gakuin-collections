@@ -1,6 +1,6 @@
 # 日中学院 NFT プロジェクト
 
-[🇨🇳 中文](README.md) 　[🇯🇵 **日本語**](README.ja.md)
+[🇺🇸 English](README.md) 　[🇯🇵 **日本語**](README.ja.md) 　[🇨🇳 中文](README.cn.md)
 
 ---
 
