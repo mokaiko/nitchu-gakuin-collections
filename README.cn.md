@@ -1,4 +1,4 @@
-# 日中学院 NFT 项目
+# 日中学院数字藏品
 
 [🇺🇸 English](README.md) 　[🇯🇵 日本語](README.ja.md) 　[🇨🇳 **中文**](README.cn.md)
 

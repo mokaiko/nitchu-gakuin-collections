@@ -1,10 +1,10 @@
-# Nitchu Gakuin Digital Collections
+# Nitchu Gakuin Collections
 
-[🇬🇧 **English**](README.md) 　[🇯🇵 日本語](README.ja.md) 　[🇨🇳 中文](README.cn.md)
+[🇺🇸 **English**](README.md) 　[🇯🇵 日本語](README.ja.md) 　[🇨🇳 中文](README.cn.md)
 
 ---
 
-The "Nitchu Gakuin Digital Collections" project provides a sustainable, low-cost platform for institutions and alumni to issue, claim, and airdrop digital collectibles.
+The "Nitchu Gakuin Collections" project provides a sustainable, low-cost platform for institutions and alumni to issue, claim, and airdrop digital collectibles.
 
 Built for low gas fees on Optimism (an Ethereum Layer-2), the system implements an upgradeable ERC-1155 contract architecture.
 
