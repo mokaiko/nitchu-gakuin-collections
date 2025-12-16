@@ -5,8 +5,8 @@ import {Script, console} from "forge-std/Script.sol";
 import {INitchuGakuinCollections} from "../src/interfaces/INitchuGakuinCollections.sol";
 
 /**
- * @title 日中学院数字藏品创建新藏品脚本
- * @dev 用于向指定藏品上传 SVG 数据块
+ * @title Nitchu Gakuin Collections: Create Collection Script
+ * @dev Script to create a new collection (and upload related SVG chunks)
  * @author Mo Kaiko
  */
 contract CreateCollectionScript is Script {
@@ -21,31 +21,32 @@ contract CreateCollectionScript is Script {
         networkConfigs[10] = NetworkConfig({
             rpcUrl: vm.envString("OP_RPC_URL"),
             deployerPrivateKey: vm.envUint("PRIVATE_KEY_ACCOUNT_1"),
-            proxyAddress: 0x9d291c7a50A3bF0980E732890177FD4e0998E13a // ⚠️ 步骤 1/5, 使用 Optimism 部署的代理合约地址
+            proxyAddress: 0x9d291c7a50A3bF0980E732890177FD4e0998E13a // ⚠️ Step 1/5: proxy address deployed on Optimism
         });
         networkConfigs[137] = NetworkConfig({
             rpcUrl: vm.envString("POLYGON_RPC_URL"),
             deployerPrivateKey: vm.envUint("PRIVATE_KEY_ACCOUNT_1"),
-            proxyAddress: 0x627E2C31cB771cfCD1207A7322773BDc3593eE4d //  ⚠️ 步骤 1/5, 使用 Polygon 部署的代理合约地址
+            proxyAddress: 0x627E2C31cB771cfCD1207A7322773BDc3593eE4d //  ⚠️ Step 1/5: proxy address deployed on Polygon
         });
         networkConfigs[31337] = NetworkConfig({
             rpcUrl: "http://localhost:8545",
             deployerPrivateKey: vm.envUint("ANVIL_PRIVATE_KEY_1"),
-            proxyAddress: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 //  ⚠️ 步骤 1/5, 使用 Anvil 部署的代理合约地址
+            proxyAddress: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 //  ⚠️ Step 1/5: proxy address for local Anvil
         });
     }
 
     function run() external {
-        NetworkConfig memory config = networkConfigs[block.chainid]; // 自动获取当前链ID对应配置
 
-        string memory name = unicode"日中学院 初代デジタル記念印"; //  ⚠️ 步骤 2/5, 藏品名称
+        NetworkConfig memory config = networkConfigs[block.chainid]; // automatically select config by chain id
+
+        string memory name = unicode"日中学院 初代デジタル記念印"; // ⚠️ Step 2/5: collection name
         string memory description =
-            unicode"日中学院日本語科の創立40周年を記念して発行された、学校初のデジタル記念コレクション。「日中学院」の校名を刻んだ印章型デザインが、これまでの歩みと絆を象徴しています。"; //  ⚠️ 藏品描述
-        uint256 maxSupply = 0; // ⚠️ 步骤 3/5, 藏品最大供应量，0表示无限量
-        bool isWhitelistEnabled = false; // ⚠️ 步骤 4/5, 是否启用白名单
-        bool isActive = true; // ⚠️ 步骤 5/5, 藏品是否激活
+            unicode"日中学院日本語科の創立40周年を記念して発行された、学校初のデジタル記念コレクション。「日中学院」の校名を刻んだ印章型デザインが、これまでの歩みと絆を象徴しています。"; // ⚠️ Collection description
+        uint256 maxSupply = 0; // ⚠️ Step 3/5: max supply (0 means unlimited)
+        bool isWhitelistEnabled = false; // ⚠️ Step 4/5: enable whitelist
+        bool isActive = true; // ⚠️ Step 5/5: set collection active
 
-        // 获取代理合约实例，替换为代理合约地址
+        // Obtain proxy contract instance; replace with your proxy address
         INitchuGakuinCollections proxy = INitchuGakuinCollections(config.proxyAddress);
 
         vm.startBroadcast(config.deployerPrivateKey);

@@ -6,8 +6,8 @@ import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {NitchuGakuinCollectionsV1} from "../src/NitchuGakuinCollectionsV1.sol"; //  ⚠️ 要部署的合约文件
 
 /**
- * @title 日中学院数字藏品部署脚本
- * @dev 用于首次部署可升级的 ERC-1155 合约
+ * @title Nitchu Gakuin Collections Deployment Script
+ * @dev Deploy an upgradeable ERC-1155 proxy and initialize it
  * @author Mo Kaiko
  */
 contract DeployScript is Script {
@@ -16,7 +16,7 @@ contract DeployScript is Script {
         uint256 deployerPrivateKey;
     }
     mapping(uint256 => NetworkConfig) public networkConfigs;
-    string public constant CONTRACT_NAME = "NitchuGakuinCollectionsV1.sol"; //  ⚠️ 要部署的合约名称
+    string public constant CONTRACT_NAME = "NitchuGakuinCollectionsV1.sol"; //  ⚠️ Contract file name to deploy
 
     function setUp() public {
         networkConfigs[10] = NetworkConfig({
@@ -30,10 +30,10 @@ contract DeployScript is Script {
     }
 
     /**
-     * @dev 部署可升级代理合约并完成初始化
+     * @dev Deploy an upgradeable proxy and perform initialization
      */
     function run() external returns (address) {
-        NetworkConfig memory config = networkConfigs[block.chainid]; // 自动获取当前链ID对应配置
+        NetworkConfig memory config = networkConfigs[block.chainid]; // automatically select config by chain id
 
         vm.startBroadcast(config.deployerPrivateKey);
 

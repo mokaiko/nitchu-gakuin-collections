@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-// OpenZeppelin 升级合约导入
+// OpenZeppelin upgradeable contract imports
 import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -9,14 +9,14 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
-// 导入接口
+// Import interface
 import {INitchuGakuinCollections} from "./interfaces/INitchuGakuinCollections.sol";
 
 /**
- * @title 日中学院数字藏品合约 V1 优化版
- * @dev ERC-1155 + UUPS 升级 + SVG 分块 + 白名单 + 管理员系统
+ * @title Nitchu Gakuin Collections V2 (optimized)
+ * @dev ERC-1155 with UUPS upgradeability, SVG chunking, whitelist and admin system
  * @author Mo Kaiko
- * @custom:organization 日中学院
+ * @custom:organization Nitchu Gakuin
  * @custom:website https://www.rizhong.org/
  */
 contract NitchuGakuinCollectionsV2 is
@@ -30,25 +30,25 @@ contract NitchuGakuinCollectionsV2 is
     /// ------------------------
     /// Storage
     /// ------------------------
-    // 藏品计数器
+    // collection counter
     uint256 private _collectionCounter;
 
-    // 管理员映射
+    // admin mapping
     mapping(address => bool) private _admins;
 
-    // 藏品信息
+    // collection metadata
     mapping(uint256 => CollectionInfo) private _collections;
 
-    // SVG 分块存储：tokenId => chunkIndex => chunkData 放在结构体外面 以提高升级兼容性
+    // SVG chunk storage: tokenId => chunkIndex => chunkData. Stored outside the struct for upgrade safety.
     mapping(uint256 => mapping(uint256 => bytes)) private _svgChunks;
 
-    // 领取记录：tokenId => account => claimed
+    // claim records: tokenId => account => claimed
     mapping(uint256 => mapping(address => bool)) private _claimed;
 
-    // 白名单：tokenId => account => whitelisted
+    // whitelist: tokenId => account => whitelisted
     mapping(uint256 => mapping(address => bool)) private _whitelists;
 
-    // 预留50个存储槽，永远放在变量的最后
+    // reserve 50 storage slots for upgrade safety
     uint256[50] private __gap;
 
     /// ------------------------
@@ -70,17 +70,17 @@ contract NitchuGakuinCollectionsV2 is
     /// ------------------------
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        _disableInitializers(); // 禁用实现合约初始化
+        _disableInitializers(); // disable initializers for implementation contract
     }
 
     /// ------------------------
     /// Initialize
     /// ------------------------
     function initialize(address initialOwner) public initializer {
-        __ERC1155_init(""); // ERC1155 URI 空
-        __Ownable_init(initialOwner); // 初始化所有者
+        __ERC1155_init(""); // empty ERC1155 URI
+        __Ownable_init(initialOwner); // initialize owner
         __Pausable_init();
-        _collectionCounter = 1; // tokenId 从1开始
+        _collectionCounter = 1; // token IDs start from 1
         _admins[initialOwner] = true;
     }
 
@@ -99,7 +99,7 @@ contract NitchuGakuinCollectionsV2 is
         _collectionCounter++;
 
         CollectionInfo storage collection = _collections[tokenId];
-        // 逐个字段赋值
+        // assign fields one by one
         collection.name = name;
         collection.description = description;
         collection.maxSupply = maxSupply;
@@ -131,9 +131,9 @@ contract NitchuGakuinCollectionsV2 is
     /// SVG Management
     /// ------------------------
     /**
-     * @param tokenId 藏品ID
-     * @param chunkIndex svg数据块索引 必须从0开始
-     * @param chunkData svg数据块内容 不能为空
+     * @param tokenId collection ID
+     * @param chunkIndex index of the SVG chunk (must start at 0)
+     * @param chunkData chunk bytes (must not be empty)
      */
     function addSvgChunk(uint256 tokenId, uint256 chunkIndex, bytes memory chunkData) public override onlyAdminOrOwner {
         CollectionInfo storage collection = _collections[tokenId];
@@ -149,24 +149,26 @@ contract NitchuGakuinCollectionsV2 is
     }
 
     /**
-     * @dev 获取 SVG 数据、预览（未完成上传完也可预览）前端预览没问题后再调用 completeSvgUpload 完成上传
+     * @dev Get the SVG data for preview. This can be used before finalizing upload.
+     *      Call `finalizeSvgUpload` after verifying frontend preview is correct.
      */
     function getSvgData(uint256 tokenId) public view returns (string memory) {
         CollectionInfo storage collection = _collections[tokenId];
         if (bytes(collection.name).length == 0) revert CollectionNotExists();
         if (collection.svgChunkCount == 0) revert Svg_ChunksEmpty();
 
-        // 拼接所有 chunk
+        // concatenate all chunks
         bytes memory svgData;
         for (uint256 i = 0; i < collection.svgChunkCount; i++) {
             svgData = abi.encodePacked(svgData, _svgChunks[tokenId][i]);
         }
 
-        return string(svgData); // 最终返回 string
+        return string(svgData); // return final string
     }
 
     /**
-     * @dev 完成SVG数据上传并永久锁定 锁定后将不能再修改 SVG 数据
+     * @dev Finalize SVG upload and permanently lock the SVG data. After finalization
+     *      the SVG cannot be modified.
      */
     function finalizeSvgUpload(uint256 tokenId) public override onlyAdminOrOwner {
         CollectionInfo storage collection = _collections[tokenId];
@@ -187,7 +189,7 @@ contract NitchuGakuinCollectionsV2 is
         if (!collection.isActive) revert CollectionNotActive();
         if (_claimed[tokenId][msg.sender]) revert AlreadyClaimed();
         if (collection.isWhitelistEnabled && !_whitelists[tokenId][msg.sender]) revert NotWhitelisted();
-        uint256 amount = 1; // 每次只能领取1个
+        uint256 amount = 1; // amount per claim (1)
         if (collection.maxSupply != 0 && collection.currentSupply + amount > collection.maxSupply) {
             revert MaxSupplyReached();
         }
@@ -205,22 +207,15 @@ contract NitchuGakuinCollectionsV2 is
     /// Airdrop
     /// ------------------------
     /**
-     * @dev
-     * 用于管理员一次性向多个地址发放指定藏品。
-     * 规则说明：
-     * - 每个地址仅空投 1 个 token
-     * - 不受以下限制：
-     *    • isActive（藏品激活状态）
-     *    • isWhitelistEnabled（白名单状态）
-     *    • maxSupply（最大供应量限制）
-     * - 但必须满足以下条件：
-     *    • 对应藏品已存在
-     *    • SVG 已完成上传并锁定（isSvgFinalized == true）
-     * - 跳过以下情况（不会回滚整个交易）：
-     *    • 地址为 0x0（invalidAddress）
-     *    • 地址已领取过（hasClaimed == true）
-     * @param tokenId 藏品ID
-     * @param recipients 接收空投的地址数组
+     * @dev Admin batch airdrop for a collection. Rules:
+     * - Each address receives 1 token
+     * - Airdrop ignores isActive, whitelist, and maxSupply checks
+     * - Preconditions: collection must exist and SVG must be finalized
+     * - Skips (does not revert) for:
+     *    • zero address
+     *    • address that already claimed
+     * @param tokenId collection ID
+     * @param recipients recipient addresses
      */
     function airdrop(uint256 tokenId, address[] memory recipients) external override onlyAdminOrOwner whenNotPaused {
         CollectionInfo storage collection = _collections[tokenId];
@@ -301,7 +296,7 @@ contract NitchuGakuinCollectionsV2 is
         CollectionInfo storage collection = _collections[tokenId];
 
         string memory svgData = getSvgData(tokenId);
-        // 使用string.concat提高Gas效率
+        // Use string.concat to improve gas efficiency
         string memory json = string.concat(
             '{"name":"',
             collection.name,
@@ -378,10 +373,6 @@ contract NitchuGakuinCollectionsV2 is
         return interfaceId == type(INitchuGakuinCollections).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    /// ------------------------
-    /// Pausable
-    /// ------------------------
-
     function pause() external onlyOwner {
         _pause();
     }
@@ -391,10 +382,10 @@ contract NitchuGakuinCollectionsV2 is
     }
 
     /// ------------------------
-    // 接收原生币
+    // Receive native token (ETH)
     receive() external payable {}
 
-    /// 提现合约中的原生币到所有者地址
+    /// Withdraw native token balance from the contract to the owner
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         if (balance == 0) revert NoFundsTowithdraw();

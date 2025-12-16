@@ -2,14 +2,14 @@
 pragma solidity ^0.8.30;
 
 /**
- * @title 日中学院数字藏品合约接口
- * @dev 定义藏品管理、白名单、领取等功能接口
+ * @title Nitchu Gakuin Collections Interface
+ * @dev Interface for collection management, whitelist, claim, and SVG handling
  * @author Mo Kaiko
- * @custom:organization 日中学院
+ * @custom:organization Nitchu Gakuin
  * @custom:website https://www.rizhong.org/
  */
 interface INitchuGakuinCollections {
-    // 事件定义
+    // Events
     event CollectionCreated(
         uint256 indexed tokenId,
         string name,
@@ -28,7 +28,7 @@ interface INitchuGakuinCollections {
     event FinalizeSvgUpload(uint256 indexed tokenId);
     event AirdropCompleted(uint256 indexed tokenId, uint256 successfulCount, uint256 alreadyClaimedCount);
 
-    // 错误定义
+    // Errors
     error OnlyAdminOrOwner();
     error CollectionNotExists();
     error CollectionNotActive();
@@ -46,25 +46,26 @@ interface INitchuGakuinCollections {
     error NoFundsTowithdraw();
     error TransferFailed();
 
-    // 藏品信息结构体 推荐只存储简单数据，复杂数据放在映射外，以提高升级兼容性
+    // Collection information struct. Keep simple data in the struct and
+    // store larger or variable data in separate mappings to improve upgrade compatibility.
     struct CollectionInfo {
-        string name; // 藏品名称
-        string description; // 简介 在OpenSea等平台显示
-        uint256 maxSupply; // 最大供应量 0表示无限量
-        uint256 currentSupply; // 当前已铸造数量
-        bool isWhitelistEnabled; // 是否启用白名单
-        bool isActive; // 是否可领取
-        uint256 svgChunkCount; // SVG数据块数量
-        bool isSvgFinalized; // SVG数据是否上传完成最终确定（锁定后永久不可修改）
+        string name; // collection name
+        string description; // description displayed on marketplaces (e.g., OpenSea)
+        uint256 maxSupply; // max supply, 0 for unlimited
+        uint256 currentSupply; // current minted amount
+        bool isWhitelistEnabled; // whether whitelist is enabled
+        bool isActive; // whether claims are active
+        uint256 svgChunkCount; // number of SVG chunks
+        bool isSvgFinalized; // whether SVG upload is finalized (locked permanently)
     }
 
     /**
-     * @dev 创建新的数字藏品
-     * @param name 藏品名称
-     * @param description 藏品简介
-     * @param maxSupply 最大供应量
-     * @param isWhitelistEnabled 是否启用白名单
-     * @param isActive 是否立即激活
+     * @dev Create a new digital collection
+     * @param name collection name
+     * @param description collection description
+     * @param maxSupply maximum supply
+     * @param isWhitelistEnabled whether whitelist is enabled
+     * @param isActive whether the collection is active immediately
      */
     function createCollection(
         string memory name,
@@ -75,84 +76,84 @@ interface INitchuGakuinCollections {
     ) external returns (uint256);
 
     /**
-     * @dev 更新藏品状态
-     * @param tokenId 藏品ID
-     * @param isWhitelistEnabled 是否启用白名单
-     * @param isActive 是否可领取
+     * @dev Update collection status
+     * @param tokenId collection ID
+     * @param isWhitelistEnabled whether whitelist is enabled
+     * @param isActive whether claims are enabled
      */
     function updateCollectionStatus(uint256 tokenId, bool isWhitelistEnabled, bool isActive) external;
 
     /**
-     * @dev 添加SVG数据块
-     * @param tokenId 藏品ID
-     * @param chunkIndex 数据块索引
-     * @param chunkData 数据块内容
+     * @dev Add an SVG chunk
+     * @param tokenId collection ID
+     * @param chunkIndex chunk index
+     * @param chunkData chunk bytes
      */
     function addSvgChunk(uint256 tokenId, uint256 chunkIndex, bytes memory chunkData) external;
 
     /**
-     * @dev 完成上传并永久锁定SVG数据
-     * @param tokenId 藏品ID
+     * @dev Finalize SVG upload and lock the SVG data permanently
+     * @param tokenId collection ID
      */
     function finalizeSvgUpload(uint256 tokenId) external;
 
     /**
-     * @dev 领取数字藏品
-     * @param tokenId 藏品ID
+     * @dev Claim a collection token
+     * @param tokenId collection ID
      */
     function claim(uint256 tokenId) external;
 
     /**
-     * @dev 管理员空投数字藏品给指定地址列表
-     * @param tokenId 藏品ID
-     * @param recipients 接收地址数组
+     * @dev Admin airdrop collection tokens to a list of recipients
+     * @param tokenId collection ID
+     * @param recipients recipient addresses
      */
     function airdrop(uint256 tokenId, address[] memory recipients) external;
 
     /**
-     * @dev 批量添加白名单
-     * @param tokenId 藏品ID
-     * @param accounts 账户地址数组
+     * @dev Add multiple accounts to the whitelist
+     * @param tokenId collection ID
+     * @param accounts account addresses
      */
     function addToWhitelist(uint256 tokenId, address[] memory accounts) external;
 
     /**
-     * @dev 批量移除白名单
-     * @param tokenId 藏品ID
-     * @param accounts 账户地址数组
+     * @dev Remove multiple accounts from the whitelist
+     * @param tokenId collection ID
+     * @param accounts account addresses
      */
     function removeFromWhitelist(uint256 tokenId, address[] memory accounts) external;
 
     /**
-     * @dev 添加管理员
-     * @param admin 管理员地址
+     * @dev Add an admin
+     * @param admin admin address
      */
     function addAdmin(address admin) external;
 
     /**
-     * @dev 移除管理员
-     * @param admin 管理员地址
+     * @dev Remove an admin
+     * @param admin admin address
      */
     function removeAdmin(address admin) external;
 
     /**
-     * @dev 获取完整的SVG数据
-     * @param tokenId 藏品ID
-     * @return 完整的SVG字符串
+     * @dev Get the full SVG data
+     * @param tokenId collection ID
+     * @return full SVG string
      */
     function getSvgData(uint256 tokenId) external view returns (string memory);
 
     /**
-     * @dev 获取藏品信息
-     * @param tokenId 藏品ID
-     * @return name 名称
-     * @return description 简介
-     * @return maxSupply 最大供应量
-     * @return currentSupply 当前供应量
-     * @return isWhitelistEnabled 是否启用白名单
-     * @return isActive 是否激活
-     * @return svgChunkCount SVG块数量
-     * @return isSvgFinalized SVG是否已完成并永久锁定
+     * @dev Get collection information
+     * @param tokenId collection ID
+     * @return name name
+     * @return description description
+     * @return maxSupply maximum supply
+     * @return currentSupply current supply
+     * @return isWhitelistEnabled whether whitelist is enabled
+     * @return isActive whether collection is active
+     * @return svgChunkCount number of SVG chunks
+     * @return isSvgFinalized whether SVG is finalized and locked
      */
     function getCollectionInfo(uint256 tokenId)
         external
@@ -169,31 +170,31 @@ interface INitchuGakuinCollections {
         );
 
     /**
-     * @dev 检查地址是否在白名单中
-     * @param tokenId 藏品ID
-     * @param account 检查的地址
-     * @return 是否在白名单中
+     * @dev Check whether an account is whitelisted for a collection
+     * @param tokenId collection ID
+     * @param account address to check
+     * @return whether the account is whitelisted
      */
     function isWhitelisted(uint256 tokenId, address account) external view returns (bool);
 
     /**
-     * @dev 检查地址是否已领取
-     * @param tokenId 藏品ID
-     * @param account 检查的地址
-     * @return 是否已领取
+     * @dev Check whether an account has claimed a token
+     * @param tokenId collection ID
+     * @param account address to check
+     * @return whether the account has claimed
      */
     function hasClaimed(uint256 tokenId, address account) external view returns (bool);
 
     /**
-     * @dev 检查地址是否是管理员
-     * @param account 检查的地址
-     * @return 是否是管理员
+     * @dev Check whether an address is an admin
+     * @param account address to check
+     * @return whether the address is an admin
      */
     function isAdmin(address account) external view returns (bool);
 
     /**
-     * @dev 获取合约版本
-     * @return 版本字符串
+     * @dev Get contract version
+     * @return version string
      */
     function getVersion() external pure returns (string memory);
 }
